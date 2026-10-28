@@ -1,0 +1,10 @@
+com/practica1/modelo/algoritmos/BusquedaConPoda.class
+com/practica1/modelo/algoritmos/EstrategiaAlgoritmica.class
+com/practica1/App.class
+com/practica1/modelo/algoritmos/BusquedaExhaustiva.class
+com/practica1/modelo/algoritmos/DyV.class
+com/practica1/modelo/algoritmos/DyVMejorada.class
+com/practica1/modelo/ResultadoBusqueda.class
+com/practica1/utils/Ordenacion.class
+com/practica1/utils/GestorFicheros.class
+com/practica1/modelo/Punto.class

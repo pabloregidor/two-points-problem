@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.practica1.modelo.Punto;
 import com.practica1.modelo.ResultadoBusqueda;
+import com.practica1.utils.Ordenacion;
 
 /**
  * Estrategia Divide y Vencerás: divide por x en el índice medio,
@@ -23,7 +24,8 @@ public class DyV extends EstrategiaAlgoritmica {
     public ResultadoBusqueda resolver(List<Punto> puntos) {
         // Copia defensiva: el dataset original NO debe quedar ordenado
         List<Punto> copia = new ArrayList<>(puntos);
-        copia.sort(Punto.POR_X);   // TODO: sustituir por QuickSort/HeapSort propio
+        // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
+        Ordenacion.ordenar(copia, Punto.POR_X);
 
         long inicio = System.currentTimeMillis();
         ResultadoBusqueda r = dyvRec(copia, 0, copia.size() - 1);

@@ -1,11 +1,10 @@
 package com.practica1.modelo.algoritmos;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.practica1.modelo.Punto;
 import com.practica1.modelo.ResultadoBusqueda;
+import com.practica1.utils.Ordenacion;
 
 /**
  * Estrategia exhaustiva con poda: ordena por x y aborta el bucle interno
@@ -18,8 +17,8 @@ public class BusquedaConPoda extends EstrategiaAlgoritmica {
     @Override
     public ResultadoBusqueda resolver(List<Punto> puntos) {
 
-        // TODO: sustituir por QuickSort o HeapSort propio (requisito del enunciado)
-        Collections.sort(puntos, Punto.POR_X);
+        // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
+        Ordenacion.ordenar(puntos, Punto.POR_X);
 
         Punto mejorP1 = null;
         Punto mejorP2 = null;
