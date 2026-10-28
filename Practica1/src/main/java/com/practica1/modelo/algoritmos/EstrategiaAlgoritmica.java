@@ -12,6 +12,12 @@ import com.practica1.modelo.ResultadoBusqueda;
 public abstract class EstrategiaAlgoritmica {
 
     /**
+     * Nombre de la estrategia según el enunciado
+     * (Exhaustivo, ExhaustivoPoda, DivideVenceras, DyV Mejorado).
+     */
+    public abstract String getNombre();
+
+    /**
      * Distancia euclídea entre dos puntos (método común a todas las estrategias).
      */
     protected double calcularDistancia(Punto p1, Punto p2) {

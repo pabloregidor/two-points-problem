@@ -12,13 +12,18 @@ import com.practica1.modelo.ResultadoBusqueda;
 public class BusquedaExhaustiva extends EstrategiaAlgoritmica {
 
     @Override
+    public String getNombre() {
+        return "Exhaustivo";
+    }
+
+    @Override
     public ResultadoBusqueda resolver(List<Punto> puntos) {
         Punto mejorP1 = null;
         Punto mejorP2 = null;
         double mejorDistancia = Double.MAX_VALUE;
         int contador = 0;
 
-        long inicio = System.currentTimeMillis();
+        long inicio = System.nanoTime();
 
         for (int i = 0; i < puntos.size() - 1; i++) {
             for (int j = i + 1; j < puntos.size(); j++) {
@@ -32,7 +37,7 @@ public class BusquedaExhaustiva extends EstrategiaAlgoritmica {
             }
         }
 
-        long fin = System.currentTimeMillis();
+        long fin = System.nanoTime();
 
         return new ResultadoBusqueda(mejorP1, mejorP2, mejorDistancia,
                                      contador, fin - inicio);

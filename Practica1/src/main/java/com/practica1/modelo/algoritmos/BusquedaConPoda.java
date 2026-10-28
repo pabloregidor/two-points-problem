@@ -15,6 +15,11 @@ import com.practica1.utils.Ordenacion;
 public class BusquedaConPoda extends EstrategiaAlgoritmica {
 
     @Override
+    public String getNombre() {
+        return "ExhaustivoPoda";
+    }
+
+    @Override
     public ResultadoBusqueda resolver(List<Punto> puntos) {
 
         // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
@@ -25,7 +30,7 @@ public class BusquedaConPoda extends EstrategiaAlgoritmica {
         double mejorDistancia = Double.MAX_VALUE;
         int contador = 0;
 
-        long inicio = System.currentTimeMillis();
+        long inicio = System.nanoTime();
 
         for (int i = 0; i < puntos.size() - 1; i++) {
 
@@ -49,7 +54,7 @@ public class BusquedaConPoda extends EstrategiaAlgoritmica {
             }
         }
 
-        long fin = System.currentTimeMillis();
+        long fin = System.nanoTime();
 
         return new ResultadoBusqueda(mejorP1, mejorP2, mejorDistancia,
                                      contador, fin - inicio);

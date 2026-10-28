@@ -17,6 +17,11 @@ import com.practica1.utils.Ordenacion;
  */
 public class DyV extends EstrategiaAlgoritmica {
 
+    @Override
+    public String getNombre() {
+        return "DivideVenceras";
+    }
+
     private static final ResultadoBusqueda VACIO =
             new ResultadoBusqueda(null, null, Double.MAX_VALUE, 0, 0);
 
@@ -27,9 +32,9 @@ public class DyV extends EstrategiaAlgoritmica {
         // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
         Ordenacion.ordenar(copia, Punto.POR_X);
 
-        long inicio = System.currentTimeMillis();
+        long inicio = System.nanoTime();
         ResultadoBusqueda r = dyvRec(copia, 0, copia.size() - 1);
-        long fin = System.currentTimeMillis();
+        long fin = System.nanoTime();
 
         // Reconstruimos con el tiempo TOTAL (ordenación + recursión)
         return new ResultadoBusqueda(r.getPunto1(), r.getPunto2(),

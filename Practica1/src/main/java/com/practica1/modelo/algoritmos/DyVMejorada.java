@@ -17,6 +17,11 @@ import com.practica1.utils.Ordenacion;
  */
 public class DyVMejorada extends EstrategiaAlgoritmica {
 
+    @Override
+    public String getNombre() {
+        return "DyV Mejorado";
+    }
+
     /** Vecinos siguientes a comparar en la franja ordenada por Y. */
     private static final int VENTANA = 7;
 
@@ -30,9 +35,9 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
         // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
         Ordenacion.ordenar(copia, Punto.POR_X);
 
-        long inicio = System.currentTimeMillis();
+        long inicio = System.nanoTime();
         ResultadoBusqueda r = dyvRec(copia, 0, copia.size() - 1);
-        long fin = System.currentTimeMillis();
+        long fin = System.nanoTime();
 
         return new ResultadoBusqueda(r.getPunto1(), r.getPunto2(),
                 r.getDistanciaMinima(), r.getComparacionesRealizadas(),

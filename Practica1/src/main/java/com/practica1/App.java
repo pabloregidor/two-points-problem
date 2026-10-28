@@ -1,13 +1,10 @@
 package com.practica1;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
-    public static void main( String[] args )
-    {
-        System.out.println( "Hello World!" );
+import com.practica1.controlador.GestorInteracciones;
+
+public class App {
+
+    public static void main(String[] args) {
+        new GestorInteracciones().menuPrincipal();
     }
 }
