@@ -8,3 +8,10 @@ target/
 .idea/
 *.iml
 .vscode/
+
+# Datasets generados (salidas de experimentos)
+*.tsp
+Practica1/*.tsp
+
+# Documento de trabajo del alumno (no versionado)
+DecisionesPractica1.md
