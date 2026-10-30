@@ -14,6 +14,7 @@ import com.practica1.modelo.algoritmos.DyV;
 import com.practica1.modelo.algoritmos.DyVMejorada;
 import com.practica1.modelo.algoritmos.EstrategiaAlgoritmica;
 import com.practica1.utils.GestorFicheros;
+import com.practica1.vista.VistaGraficaTiempos;
 
 public class GestorInteracciones {
 
@@ -49,7 +50,10 @@ public class GestorInteracciones {
             System.out.print("   Opcion: ");
 
             if (!teclado.hasNextInt()) {
-                teclado.next();            // descartar entrada no numerica
+                if (!teclado.hasNext()) {          // EOF: cerrar con elegancia
+                    break;
+                }
+                teclado.next();                    // descartar entrada no numerica
                 continue;
             }
 
@@ -149,6 +153,10 @@ public class GestorInteracciones {
         // Mostrar distancias además de tiempos (opción 5)
         boolean mostrarDistancias = estrs.size() == 2;
 
+        // Datos acumulados para la gráfica (solo cuando se comparan las 4)
+        List<Integer> tallasEjecutadas = new ArrayList<>();
+        double[][] mediasAcumuladas = new double[estrs.size()][100]; // máx 100 tallas
+
         // Cabecera
         System.out.println();
         System.out.println("Estado del experimento: " + EXPERIMENTOS_POR_TALLA
@@ -172,7 +180,6 @@ public class GestorInteracciones {
             long[] sumaDist   = new long[estrs.size()];
 
             for (int exp = 0; exp < EXPERIMENTOS_POR_TALLA; exp++) {
-
                 // Dataset aleatorio de esta talla compartido por TODAS
                 gestorFicheros.generarAleatorio(talla, casoMedio, carpetaActual);
                 List<Punto> dataset = gestorFicheros.cargarTSP(
@@ -190,8 +197,12 @@ public class GestorInteracciones {
             }
 
             // Media por talla
+            int indiceTalla = tallasEjecutadas.size();
+            tallasEjecutadas.add(talla);
+
             for (int e = 0; e < estrs.size(); e++) {
                 double mediaMs = sumaTiempo[e] / 1e6 / EXPERIMENTOS_POR_TALLA;
+                mediasAcumuladas[e][indiceTalla] = mediaMs;
                 double mediaDist = sumaDist[e] / (double) EXPERIMENTOS_POR_TALLA;
 
                 if (mostrarDistancias) {
@@ -202,6 +213,123 @@ public class GestorInteracciones {
             }
             System.out.println();
         }
+
+        // === Gráfica de tiempos (requisito de nota de la práctica) ===
+        if (estrs.size() == 4 && tallasEjecutadas.size() >= 2) {
+            lanzarGraficaTiempos(estrs, tallasEjecutadas, mediasAcumuladas,
+                                 casoMedio);
+        }
+    }
+
+    private void lanzarGraficaTiempos(List<EstrategiaAlgoritmica> estrs,
+                                      List<Integer> tallas,
+                                      double[][] medias,
+                                      boolean casoMedio) {
+        int n = tallas.size();
+        int[] tallasArr = new int[n];
+        for (int i = 0; i < n; i++) tallasArr[i] = tallas.get(i);
+
+        double[][] tiempos = new double[estrs.size()][n];
+        for (int e = 0; e < estrs.size(); e++) {
+            System.arraycopy(medias[e], 0, tiempos[e], 0, n);
+        }
+
+        java.awt.Color[] colores = {
+                java.awt.Color.BLACK, java.awt.Color.RED,
+                java.awt.Color.BLUE, java.awt.Color.GREEN.darker()
+        };
+
+        String tipo = casoMedio ? "caso medio" : "PEOR CASO (misma x)";
+        new VistaGraficaTiempos().mostrar(
+                new VistaGraficaTiempos.Datos(
+                        tallasArr, tiempos, nombresDe(estrs), colores),
+                tipo);
+    }
+
+    private String[] nombresDe(List<EstrategiaAlgoritmica> estrs) {
+        String[] nombres = new String[estrs.size()];
+        for (int i = 0; i < estrs.size(); i++) {
+            nombres[i] = estrs.get(i).getNombre();
+        }
+        return nombres;
+    }
+
+    /**
+     * MODO DEMO: without keyboard input, run some tallas, show the
+     * time graph and wait until the user closes the window (the JVM
+     * does not terminate while it is visible).
+     */
+    public void demoConVentana() {
+
+        List<Integer> tallas = new ArrayList<>();
+        double[][] medias = new double[estrategias.size()][100];
+        long[] suma = new long[estrategias.size()];
+
+        for (int talla = 200; talla <= 600; talla += 200) {
+
+            for (int e = 0; e < estrategias.size(); e++) suma[e] = 0;
+
+            for (int exp = 0; exp < EXPERIMENTOS_POR_TALLA; exp++) {
+
+                gestorFicheros.generarAleatorio(talla, true, carpetaActual);
+                List<Punto> dataset = gestorFicheros.cargarTSP(
+                        new File(carpetaActual, "dataset" + talla + ".tsp"));
+
+                for (int e = 0; e < estrategias.size(); e++) {
+                    List<Punto> copia = copiar(dataset);
+                    ResultadoBusqueda r = estrategias.get(e).resolver(copia);
+                    suma[e] += r.getTiempoEjecucionMilisegundos();
+                }
+            }
+
+            int indice = tallas.size();
+            tallas.add(talla);
+            for (int e = 0; e < estrategias.size(); e++) {
+                medias[e][indice] = suma[e] / 1e6 / EXPERIMENTOS_POR_TALLA;
+            }
+        }
+
+        int n = tallas.size();
+        int[] tallasArr = new int[n];
+        double[][] datos = new double[estrategias.size()][n];
+        for (int i = 0; i < n; i++) tallasArr[i] = tallas.get(i);
+        for (int e = 0; e < estrategias.size(); e++) {
+            System.arraycopy(medias[e], 0, datos[e], 0, n);
+        }
+
+        // Wait until the window close (so the JVM lives and the user sees it)
+        java.util.concurrent.CountDownLatch cierre = new java.util.concurrent.CountDownLatch(1);
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            VistaGraficaTiempos v = new VistaGraficaTiempos();
+            v.setPreferredSize(new java.awt.Dimension(950, 620));
+            v.setDatos(
+                    new VistaGraficaTiempos.Datos(
+                            tallasArr, datos, nombresDe(estrategias),
+                            new java.awt.Color[]{ java.awt.Color.BLACK, java.awt.Color.RED,
+                                    java.awt.Color.BLUE, java.awt.Color.GREEN.darker() }),
+                    "caso medio");
+
+            javax.swing.JFrame frame = new javax.swing.JFrame("Gráfica de tiempos (demo): caso medio");
+            frame.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+            frame.add(v);
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    cierre.countDown();
+                }
+            });
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+
+        try {
+            cierre.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("Demo terminada.");
     }
 
     private void compararDos() {
