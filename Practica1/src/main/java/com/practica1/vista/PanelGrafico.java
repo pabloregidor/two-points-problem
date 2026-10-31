@@ -40,12 +40,14 @@ public class PanelGrafico extends JPanel {
     }
 
     /**
-     * Abre la ventana con la gráfica y NO devuelve el control hasta que
-     * el usuario la cierra (CountDownLatch), para que el menú CLI
-     * no avance ni muera la JVM mientras se ve la solución.
+     * Abre la ventana con la gráfica.
+     * bloquear=true: NO devuelve el control hasta que el usuario la cierra
+     * (uso desde menú CLI); bloquear=false: dispara la ventana y sigue
+     * (uso desde la VentanaPrincipal: si no, el hilo del interfaz se
+     * quedaria esperando a sí mismo).
      */
     public static void mostrar(List<Punto> puntos, ResultadoBusqueda solucion,
-                               String titulo) {
+                               String titulo, boolean bloquear) {
 
         CountDownLatch cierre = new CountDownLatch(1);
 
@@ -68,7 +70,7 @@ public class PanelGrafico extends JPanel {
         });
 
         try {
-            cierre.await();
+            if (bloquear) cierre.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

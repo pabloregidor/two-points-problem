@@ -35,6 +35,11 @@ public class GestorInteracciones {
     private List<Punto> datasetCargado;
     private File carpetaActual = new File(".");   // donde se escriben los .tsp
 
+    // Acceso de la vista (solo lectura)
+    public List<EstrategiaAlgoritmica> getEstrategias() {
+        return estrategias;
+    }
+
     public void menuPrincipal() {
 
         int opcion = -1;
@@ -65,7 +70,7 @@ public class GestorInteracciones {
                 case 1 -> crearFicheroAleatorio();
                 case 2 -> cargarDataset();
                 case 3 -> comprobarEstrategias();
-                case 4 -> compararEstrategias(estrategias);
+                case 4 -> compararEstrategiasDesdeMenu(estrategias);
                 case 5 -> compararDos();
                 case 0 -> System.out.println("Adiós.");
                 default -> System.out.println("Opción inválida.");
@@ -73,7 +78,13 @@ public class GestorInteracciones {
         }
     }
 
-    // ===== OPCIÓN 1 =====
+    // ===== ACCIÓN NÚCLEO 1 (pública: CLI y GUI) =====
+    public void crearFicheroAleatorio(int n, boolean casoMedio) {
+        gestorFicheros.generarAleatorio(n, casoMedio, carpetaActual);
+        System.out.println("Fichero creado: dataset" + n + ".tsp");
+    }
+
+    // (envoltorio CLI que pide datos por consola)
     private void crearFicheroAleatorio() {
 
         System.out.print("¿Cuántos puntos? ");
@@ -86,30 +97,33 @@ public class GestorInteracciones {
         int modo = teclado.nextInt();
         teclado.nextLine();
 
-        gestorFicheros.generarAleatorio(n, modo == 1, carpetaActual);
-        System.out.println("Fichero creado: dataset" + n + ".tsp");
+        crearFicheroAleatorio(n, modo == 1);
     }
 
-    // ===== OPCIÓN 2 =====
-    private void cargarDataset() {
+    // ===== ACCIÓN NÚCLEO 2 (pública: CLI y GUI) =====
+    public List<Punto> cargarFichero(File f) {
 
-        System.out.print("Ruta del fichero .tsp: ");
-        String ruta = teclado.nextLine().trim();
-
-        File f = new File(ruta);
         List<Punto> puntos = gestorFicheros.cargarTSP(f);
-
         if (!puntos.isEmpty()) {
             datasetCargado = puntos;
             carpetaActual = f.getParentFile() != null ? f.getParentFile() : new File(".");
             System.out.println("Cargados " + puntos.size() + " puntos de " + f.getName());
-        } else {
-            System.out.println("No se ha cargado ningún punto.");
+            return puntos;
         }
+        System.out.println("No se ha cargado ningún punto.");
+        return null;
     }
 
-    // ===== OPCIÓN 3 =====
-    private void comprobarEstrategias() {
+    // (envoltorio CLI)
+    private void cargarDataset() {
+
+        System.out.print("Ruta del fichero .tsp: ");
+        String ruta = teclado.nextLine().trim();
+        cargarFichero(new File(ruta));
+    }
+
+    // ===== ACCIÓN NÚCLEO 3 (pública): la opción 3 del enunciado =====
+    public void comprobarEstrategias() {
 
         if (!hayDataset()) return;
 
@@ -140,14 +154,15 @@ public class GestorInteracciones {
         }
 
         // Ventana con la solución dibujada (nota de la práctica);
-        // se espera a que la cierres para volver al menú.
+        // desde el menú CLI: se espera a que la cierres para volver al menú.
         PanelGrafico.mostrar(datasetCargado, mejorResultado,
-                             datasetCargado.size() + " puntos");
+                             datasetCargado.size() + " puntos", true);
     }
 
     // ===== OPCIÓN 4: todas las estrategias =====
     // ===== OPCIÓN 5: solo 2, con distancias mostradas =====
-    private void compararEstrategias(List<EstrategiaAlgoritmica> estrs) {
+    // ===== ACCIÓN NÚCLEO 4/5 (pública) =====
+    private void compararEstrategiasDesdeMenu(List<EstrategiaAlgoritmica> estrs) {
 
         // Esquema del enunciado (pág. 11): tamaños entre min y max con paso
         System.out.print("Talla mínima: ");
@@ -161,7 +176,36 @@ public class GestorInteracciones {
         System.out.print("¿Caso medio (1) o PEOR CASO misma x (2)? ");
         int modo = teclado.nextInt();
         teclado.nextLine();
-        boolean casoMedio = (modo == 1);
+
+        compararEstrategias(estrs, tallaMin, tallaMax, paso, modo == 1);
+    }
+
+    // ===== OPCIÓN 5: solo 2, con distancias mostradas =====
+    private void compararDos() {
+
+        System.out.println("Estrategias disponibles:");
+        for (int i = 0; i < estrategias.size(); i++) {
+            System.out.println(" " + (i + 1) + ") " + estrategias.get(i).getNombre());
+        }
+
+        System.out.print("Estrategia A (1-4): ");
+        int a = teclado.nextInt();
+        System.out.print("Estrategia B (1-4): ");
+        int b = teclado.nextInt();
+        teclado.nextLine();
+
+        List<EstrategiaAlgoritmica> par = List.of(
+                estrategias.get(a - 1),
+                estrategias.get(b - 1)
+        );
+
+        compararEstrategiasDesdeMenu(par);
+    }
+
+    // ===== NÚCLEO de comparación (pública: CLI y GUI) =====
+    public void compararEstrategias(List<EstrategiaAlgoritmica> estrs,
+                                    int tallaMin, int tallaMax, int paso,
+                                    boolean casoMedio) {
 
         // Mostrar distancias además de tiempos (opción 5)
         boolean mostrarDistancias = estrs.size() == 2;
@@ -343,27 +387,6 @@ public class GestorInteracciones {
             Thread.currentThread().interrupt();
         }
         System.out.println("Demo terminada.");
-    }
-
-    private void compararDos() {
-
-        System.out.println("Estrategias disponibles:");
-        for (int i = 0; i < estrategias.size(); i++) {
-            System.out.println(" " + (i + 1) + ") " + estrategias.get(i).getNombre());
-        }
-
-        System.out.print("Estrategia A (1-4): ");
-        int a = teclado.nextInt();
-        System.out.print("Estrategia B (1-4): ");
-        int b = teclado.nextInt();
-        teclado.nextLine();
-
-        List<EstrategiaAlgoritmica> par = List.of(
-                estrategias.get(a - 1),
-                estrategias.get(b - 1)
-        );
-
-        compararEstrategias(par);
     }
 
     // ===== utilidades =====
