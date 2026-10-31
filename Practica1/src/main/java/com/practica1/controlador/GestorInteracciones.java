@@ -14,6 +14,7 @@ import com.practica1.modelo.algoritmos.DyV;
 import com.practica1.modelo.algoritmos.DyVMejorada;
 import com.practica1.modelo.algoritmos.EstrategiaAlgoritmica;
 import com.practica1.utils.GestorFicheros;
+import com.practica1.vista.PanelGrafico;
 import com.practica1.vista.VistaGraficaTiempos;
 
 public class GestorInteracciones {
@@ -115,6 +116,7 @@ public class GestorInteracciones {
         System.out.println();
         System.out.println("Estrategia             Punto1                      Punto2  distancia  dist  tiempo(mseg)");
 
+        ResultadoBusqueda mejorResultado = null;
         for (EstrategiaAlgoritmica estrategia : estrategias) {
 
             // Copia NUEVA por estrategia: cada una ordena a su aire,
@@ -123,6 +125,12 @@ public class GestorInteracciones {
 
             ResultadoBusqueda r = estrategia.resolver(copia);
 
+            // para el panel: nos quedamos con la mejor de las 4
+            if (mejorResultado == null
+                    || r.getDistanciaMinima() < mejorResultado.getDistanciaMinima()) {
+                mejorResultado = r;
+            }
+
             // Fichero de salida con el nombre de la estrategia
             gestorFicheros.guardarTSP(
                     new File(carpetaActual, estrategia.getNombre().replace(" ", "") + ".tsp"),
@@ -130,6 +138,11 @@ public class GestorInteracciones {
 
             mostrarFila(estrategia.getNombre(), r, true);
         }
+
+        // Ventana con la solución dibujada (nota de la práctica);
+        // se espera a que la cierres para volver al menú.
+        PanelGrafico.mostrar(datasetCargado, mejorResultado,
+                             datasetCargado.size() + " puntos");
     }
 
     // ===== OPCIÓN 4: todas las estrategias =====
