@@ -9,8 +9,6 @@ import com.practica1.utils.Ordenacion;
 /**
  * Estrategia exhaustiva con poda: ordena por x y aborta el bucle interno
  * cuando la separación en x supera la mejor distancia conocida.
- *
- * TODO: sustituir el Collections.sort por QuickSort/HeapSort propio.
  */
 public class BusquedaConPoda extends EstrategiaAlgoritmica {
 
@@ -22,7 +20,6 @@ public class BusquedaConPoda extends EstrategiaAlgoritmica {
     @Override
     public ResultadoBusqueda resolver(List<Punto> puntos) {
 
-        // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
         Ordenacion.ordenar(puntos, Punto.POR_X);
 
         Punto mejorP1 = null;
@@ -43,8 +40,7 @@ public class BusquedaConPoda extends EstrategiaAlgoritmica {
                    && puntos.get(j).getX() - pi.getX() < mejorDistancia) {
 
                 double distancia = calcularDistancia(pi, puntos.get(j));
-                contador++;   // solo distancias EUCLÍDEAS, no comparaciones de x
-
+                contador++;   
                 if (distancia < mejorDistancia) {
                     mejorDistancia = distancia;
                     mejorP1 = pi;

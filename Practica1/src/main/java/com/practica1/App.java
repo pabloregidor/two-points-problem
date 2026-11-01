@@ -10,6 +10,8 @@ public class App {
             new GestorInteracciones().demoConVentana();
         } else if (args.length > 0 && "gui".equals(args[0])) {
             SwingUtilities.invokeLater(() -> new com.practica1.vista.VentanaPrincipal().setVisible(true));
+        } else if (args.length > 0 && "capturas".equals(args[0])) {
+            new GestorInteracciones().capturasParaMemoria();
         } else {
             new GestorInteracciones().menuPrincipal();
         }

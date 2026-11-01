@@ -10,10 +10,6 @@ import com.practica1.utils.Ordenacion;
 /**
  * Estrategia Divide y Vencerás MEJORADA: igual que DyV, pero la franja
  * central se ORDENA POR Y y cada punto se compara solo con sus siguientes
- * 7 vecinos en esa lista (los cuadrados de ½ delta no admiten 2 puntos).
- *
- * Es la estrategia que mejor resiste el PEOR CASO (todos los puntos
- * con la misma x): la franja deja de costar O(n^2).
  */
 public class DyVMejorada extends EstrategiaAlgoritmica {
 
@@ -22,7 +18,6 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
         return "DyV Mejorado";
     }
 
-    /** Vecinos siguientes a comparar en la franja ordenada por Y. */
     private static final int VENTANA = 7;
 
     private static final ResultadoBusqueda VACIO =
@@ -65,13 +60,29 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
         ResultadoBusqueda rd = dyvRec(p, medio + 1, der);
         ResultadoBusqueda min = combinar(ri, rd);
 
-        // VENCERAS: franja central |x - xm| < d_min
+        // VENCERAS: franja central |x - xm| < d_min.
+        // Construcción EFICIENTE con doble puntero sobre la lista
+        // ordenada por x: O(tam franja) en vez de O(n) por nodo.
         double dMin = min.getDistanciaMinima();
+
+        int li = medio;
+        while (li >= izq && xm - p.get(li).getX() < dMin) {
+            li--;
+        }
+        li++;
+
+        int ld = medio + 1;
+        while (ld <= der && p.get(ld).getX() - xm < dMin) {
+            ld++;
+        }
+        ld--;
+
         List<Punto> franja = new ArrayList<>();
-        for (Punto punto : p) {
-            if (Math.abs(punto.getX() - xm) < dMin) {
-                franja.add(punto);
-            }
+        for (int i = li; i <= medio; i++) {
+            franja.add(p.get(i));
+        }
+        for (int i = medio + 1; i <= ld; i++) {
+            franja.add(p.get(i));
         }
 
         // === MEJORA respecto a DyV ===

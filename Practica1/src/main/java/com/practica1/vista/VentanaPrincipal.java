@@ -166,7 +166,6 @@ public class VentanaPrincipal extends JFrame {
 
     /**
      * OutputStream que escribe en el JTextArea de la ventana.
-     * Truco clásico: una consola Swing que "escucha" System.out.
      */
     private static class OutputStreamConsola extends OutputStream {
         private final JTextArea area;

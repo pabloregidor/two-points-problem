@@ -7,7 +7,6 @@ import com.practica1.modelo.ResultadoBusqueda;
 
 /**
  * Estrategia exhaustiva: comprueba todos los pares posibles.
- * Complejidad: O(n^2) — n·(n-1)/2 distancias euclídeas siempre.
  */
 public class BusquedaExhaustiva extends EstrategiaAlgoritmica {
 

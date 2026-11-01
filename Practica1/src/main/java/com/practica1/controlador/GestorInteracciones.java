@@ -271,7 +271,7 @@ public class GestorInteracciones {
             System.out.println();
         }
 
-        // === Gráfica de tiempos (requisito de nota de la práctica) ===
+        // === Gráfica de tiempos ===
         if (estrs.size() == 4 && tallasEjecutadas.size() >= 2) {
             lanzarGraficaTiempos(estrs, tallasEjecutadas, mediasAcumuladas,
                                  casoMedio);
@@ -312,10 +312,84 @@ public class GestorInteracciones {
     }
 
     /**
-     * MODO DEMO: without keyboard input, run some tallas, show the
-     * time graph and wait until the user closes the window (the JVM
-     * does not terminate while it is visible).
+     * MODO CAPTURAS: ejecuta los experimentos OFICIALES de la memoria
+     * (tallas 200..5000, 10 experimentos por talla) en caso medio y
+     * peor caso, imprime las tablas y guarda las 2 gráficas como PNG
+     * SIN interacción. Lanzado con `App capturas`.
      */
+    public void capturasParaMemoria() {
+
+        int[] tallas = {200, 500, 1000, 1500, 2000, 3000, 4000, 5000};
+        String[] casos = {"caso_medio", "peor_caso"};
+        boolean[] medios = {true, false};
+
+        for (int c = 0; c < casos.length; c++) {
+
+            System.out.println("\n===== EXPERIMENTO " + casos[c].toUpperCase()
+                    + " =====");
+            System.out.println();
+
+            double[][] medias = new double[estrategias.size()][tallas.length];
+
+            for (int i = 0; i < tallas.length; i++) {
+                int talla = tallas[i];
+                long[] sumaTiempo = new long[estrategias.size()];
+
+                for (int exp = 0; exp < EXPERIMENTOS_POR_TALLA; exp++) {
+
+                    gestorFicheros.generarAleatorio(talla, medios[c], carpetaActual);
+                    List<Punto> dataset = gestorFicheros.cargarTSP(
+                            new File(carpetaActual, "dataset" + talla + ".tsp"));
+
+                    for (int e = 0; e < estrategias.size(); e++) {
+                        List<Punto> copia = copiar(dataset);
+                        ResultadoBusqueda r = estrategias.get(e).resolver(copia);
+                        sumaTiempo[e] += r.getTiempoEjecucionMilisegundos();
+                    }
+                }
+
+                System.out.print("Talla " + talla + ": ");
+                for (int e = 0; e < estrategias.size(); e++) {
+                    medias[e][i] = sumaTiempo[e] / 1e6 / EXPERIMENTOS_POR_TALLA;
+                    System.out.printf(Locale.US, "%s=%.6fms  ",
+                            estrategias.get(e).getNombre(), medias[e][i]);
+                }
+                System.out.println();
+            }
+
+            // Tabla CSV para la memoria (números limpios, listos para pegar)
+            File csv = new File(carpetaActual, "tabla_" + casos[c] + ".csv");
+            try {
+                java.io.PrintWriter pw = new java.io.PrintWriter(csv);
+                pw.println("Talla;" + String.join(";", nombresDe(estrategias)));
+                for (int i = 0; i < tallas.length; i++) {
+                    StringBuilder sb = new StringBuilder(String.valueOf(tallas[i]));
+                    for (int e = 0; e < estrategias.size(); e++) {
+                        sb.append(';').append(String.format(Locale.US, "%.6f", medias[e][i]));
+                    }
+                    pw.println(sb);
+                }
+                pw.close();
+            } catch (java.io.IOException e) {
+                System.err.println("Error escribiendo CSV " + csv + ": " + e.getMessage());
+            }
+
+            // Gráfica como PNG para la memoria
+            java.awt.Color[] colores = {
+                    java.awt.Color.BLACK, java.awt.Color.RED,
+                    java.awt.Color.BLUE, java.awt.Color.GREEN.darker()
+            };
+            new VistaGraficaTiempos().guardarComoImagen(
+                    new VistaGraficaTiempos.Datos(tallas, medias,
+                            nombresDe(estrategias), colores),
+                    casos[c],
+                    new File(carpetaActual, "grafica_" + casos[c] + ".png"));
+        }
+
+        System.out.println("\nCAPTURAS PARA LA MEMORIA LISTAS (PNG + CSV en "
+                + carpetaActual.getAbsolutePath() + ")");
+    }
+
     public void demoConVentana() {
 
         List<Integer> tallas = new ArrayList<>();

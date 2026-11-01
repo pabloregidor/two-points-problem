@@ -9,11 +9,7 @@ import com.practica1.utils.Ordenacion;
 
 /**
  * Estrategia Divide y Vencerás: divide por x en el índice medio,
- * resuelve recursivamente cada mitad y resuelve la franja central
- * con búsqueda con poda.
- *
- * Casos base usan un resultado neutro con distancia infinita
- * (elemento neutro del min), lo que evita propagar null.
+ * resuelve recursivamente cada mitad con búsqueda con poda.
  */
 public class DyV extends EstrategiaAlgoritmica {
 
@@ -27,16 +23,13 @@ public class DyV extends EstrategiaAlgoritmica {
 
     @Override
     public ResultadoBusqueda resolver(List<Punto> puntos) {
-        // Copia defensiva: el dataset original NO debe quedar ordenado
         List<Punto> copia = new ArrayList<>(puntos);
-        // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
         Ordenacion.ordenar(copia, Punto.POR_X);
 
         long inicio = System.nanoTime();
         ResultadoBusqueda r = dyvRec(copia, 0, copia.size() - 1);
         long fin = System.nanoTime();
 
-        // Reconstruimos con el tiempo TOTAL (ordenación + recursión)
         return new ResultadoBusqueda(r.getPunto1(), r.getPunto2(),
                 r.getDistanciaMinima(), r.getComparacionesRealizadas(),
                 fin - inicio);
@@ -44,7 +37,7 @@ public class DyV extends EstrategiaAlgoritmica {
 
     private ResultadoBusqueda dyvRec(List<Punto> p, int izq, int der) {
 
-        // Caso base 1: 0 o 1 punto -> par imposible (sentinela infinito)
+        // Caso base 1: 0 o 1 punto -> par imposible 
         if (der - izq < 1) {
             return VACIO;
         }
@@ -55,7 +48,7 @@ public class DyV extends EstrategiaAlgoritmica {
             return new ResultadoBusqueda(p.get(izq), p.get(der), d, 1, 0);
         }
 
-        // DIVIDE (medio es INDICE; la vertical es la x de ese punto)
+        // DIVIDE 
         int medio = izq + (der - izq) / 2;
         double xm = p.get(medio).getX();
 
@@ -63,13 +56,29 @@ public class DyV extends EstrategiaAlgoritmica {
         ResultadoBusqueda rd = dyvRec(p, medio + 1, der);
         ResultadoBusqueda min = combinar(ri, rd);
 
-        // VENCERAS: franja central |x - xm| < d_min
+        // VENCERAS: franja central |x - xm| < d_min.
+        // Construcción EFICIENTE con doble puntero sobre la lista
+        // ordenada por x: O(tam franja) en vez de O(n) por nodo.
         double dMin = min.getDistanciaMinima();
+
+        int li = medio;           // descender por la izquierda
+        while (li >= izq && xm - p.get(li).getX() < dMin) {
+            li--;
+        }
+        li++;
+
+        int ld = medio + 1;       // ascender por la derecha
+        while (ld <= der && p.get(ld).getX() - xm < dMin) {
+            ld++;
+        }
+        ld--;
+
         List<Punto> franja = new ArrayList<>();
-        for (Punto punto : p) {
-            if (Math.abs(punto.getX() - xm) < dMin) {
-                franja.add(punto);
-            }
+        for (int i = li; i <= medio; i++) {
+            franja.add(p.get(i));
+        }
+        for (int i = medio + 1; i <= ld; i++) {
+            franja.add(p.get(i));
         }
 
         // Busqueda con poda dentro de la franja

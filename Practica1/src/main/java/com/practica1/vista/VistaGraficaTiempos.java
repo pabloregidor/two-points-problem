@@ -1,7 +1,9 @@
 package com.practica1.vista;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,7 @@ import java.util.List;
  */
 public class VistaGraficaTiempos extends JPanel {
 
-    /** Datos mínimos que necesita el panel (inmutables). */
+    /** Datos mínimos que necesita el panel . */
     public record Datos(int[] tallas,
                         double[][] tiempos,   // [estrategia][talla] en ms
                         String[] nombres,
@@ -34,6 +36,30 @@ public class VistaGraficaTiempos extends JPanel {
         this.datos = d;
         this.titulo = tituloVentana;
         repaint();
+    }
+
+    /**
+     * Renderiza la gráfica a un PNG en disco SIN abrir ventana
+     * (usado para las capturas de la memoria: nítido y reproducible).
+     */
+    public static void guardarComoImagen(Datos d, String titulo, File destino) {
+        try {
+            VistaGraficaTiempos panel = new VistaGraficaTiempos();
+            panel.setPreferredSize(new Dimension(1150, 640));
+            panel.setSize(1150, 640);
+            panel.setDatos(d, titulo);
+
+            java.awt.image.BufferedImage img =
+                    new java.awt.image.BufferedImage(1150, 640,
+                            java.awt.image.BufferedImage.TYPE_INT_RGB);
+            java.awt.Graphics2D g = img.createGraphics();
+            panel.printAll(g);   // dispara paintComponent sobre la imagen
+            g.dispose();
+
+            javax.imageio.ImageIO.write(img, "png", destino);
+        } catch (Exception e) {
+            System.err.println("Error generando imagen " + destino + ": " + e.getMessage());
+        }
     }
 
     /** Crea y muestra la ventana con esta gráfica ya dibujada. */
