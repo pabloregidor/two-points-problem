@@ -14,6 +14,8 @@ import com.practica1.modelo.algoritmos.DyV;
 import com.practica1.modelo.algoritmos.DyVMejorada;
 import com.practica1.modelo.algoritmos.EstrategiaAlgoritmica;
 import com.practica1.utils.GestorFicheros;
+import com.practica1.utils.Ordenacion;
+import com.practica1.vista.ImagenEstadosArray;
 import com.practica1.vista.PanelGrafico;
 import com.practica1.vista.VistaGraficaTiempos;
 
@@ -319,6 +321,7 @@ public class GestorInteracciones {
      */
     public void capturasParaMemoria() {
 
+
         int[] tallas = {200, 500, 1000, 1500, 2000, 3000, 4000, 5000};
         String[] casos = {"caso_medio", "peor_caso"};
         boolean[] medios = {true, false};
@@ -388,6 +391,76 @@ public class GestorInteracciones {
 
         System.out.println("\nCAPTURAS PARA LA MEMORIA LISTAS (PNG + CSV en "
                 + carpetaActual.getAbsolutePath() + ")");
+    }
+
+    /**
+     * MODO CAPTURAS AUX: genera las imágenes complementarias de la memoria
+     * SIN repetir los experimentos largos:
+     *  - dibujo de la solución (PanelGrafico) en caso medio y peor caso
+     *  - ejemplos límite del HeapSort (estados inicial / heap / ordenado)
+     * Lanzado con `App capturas_aux`.
+     */
+    public void capturasAuxiliaresParaMemoria() {
+
+        com.practica1.modelo.algoritmos.EstrategiaAlgoritmica poda =
+                new com.practica1.modelo.algoritmos.BusquedaConPoda();
+
+        // ===== 1. Dibujo de la solución — CASO MEDIO =====
+        List<Punto> datasetMedio = gestorFicheros.generarAleatorio(600, true, carpetaActual);
+        ResultadoBusqueda rMedio = poda.resolver(copiar(datasetMedio));
+        PanelGrafico.guardarComoImagen(datasetMedio, rMedio, "caso medio",
+                new File(carpetaActual, "dibujo_solucion_caso_medio.png"));
+        System.out.println("OK dibujo_solucion_caso_medio.png");
+
+        // ===== 2. Dibujo de la solución — PEOR CASO (misma x: la vertical) =====
+        List<Punto> datasetPeor = gestorFicheros.generarAleatorio(600, false, carpetaActual);
+        ResultadoBusqueda rPeor = poda.resolver(copiar(datasetPeor));
+        PanelGrafico.guardarComoImagen(datasetPeor, rPeor, "peor caso (misma x)",
+                new File(carpetaActual, "dibujo_solucion_peor_caso.png"));
+        System.out.println("OK dibujo_solucion_peor_caso.png");
+
+        // ===== 3. Ejemplos límite del HeapSort =====
+        java.util.Random r = new java.util.Random();
+        int n = 12;
+
+        // CASO 'MEJOR' (datos aleatorios)
+        List<Integer> mejor = ImagenEstadosArray.aleatorios(n, r);
+        List<String> etiquetas = new java.util.ArrayList<>();
+        List<List<Integer>> estados = new java.util.ArrayList<>();
+        Ordenacion.ordenar(mejor, java.util.Comparator.naturalOrder(),
+                (etiqueta, instantanea) -> {
+                    etiquetas.add(etiqueta);
+                    estados.add(new java.util.ArrayList<>());
+                    for (Object o : instantanea) {
+                        estados.get(estados.size() - 1)
+                               .add(((Number) o).intValue());
+                    }
+                });
+        ImagenEstadosArray.guardar(etiquetas, estados,
+                new File(carpetaActual, "heapsort_datos_aleatorios.png"));
+        System.out.println("OK heapsort_datos_aleatorios.png");
+
+        // CASO LÍMITE (ordenado ascendente: caso clásico de estudio del HeapSort)
+        List<Integer> ascendente = new java.util.ArrayList<>();
+        for (int i = 1; i <= n; i++) {
+            ascendente.add(i);
+        }
+        List<String> etiquetas2 = new java.util.ArrayList<>();
+        List<List<Integer>> estados2 = new java.util.ArrayList<>();
+        Ordenacion.ordenar(ascendente, java.util.Comparator.naturalOrder(),
+                (etiqueta, instantanea) -> {
+                    etiquetas2.add(etiqueta);
+                    estados2.add(new java.util.ArrayList<>());
+                    for (Object o : instantanea) {
+                        estados2.get(estados2.size() - 1)
+                               .add(((Number) o).intValue());
+                    }
+                });
+        ImagenEstadosArray.guardar(etiquetas2, estados2,
+                new File(carpetaActual, "heapsort_ordenado_ascendente.png"));
+        System.out.println("OK heapsort_ordenado_ascendente.png");
+
+        System.out.println("CAPTURAS AUXILIARES LISTAS en " + carpetaActual.getAbsolutePath());
     }
 
     public void demoConVentana() {
