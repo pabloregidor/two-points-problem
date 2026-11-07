@@ -333,10 +333,12 @@ public class GestorInteracciones {
             System.out.println();
 
             double[][] medias = new double[estrategias.size()][tallas.length];
+            int[][] dist = new int[estrategias.size()][tallas.length];
 
             for (int i = 0; i < tallas.length; i++) {
                 int talla = tallas[i];
                 long[] sumaTiempo = new long[estrategias.size()];
+                long[] sumaDist = new long[estrategias.size()];
 
                 for (int exp = 0; exp < EXPERIMENTOS_POR_TALLA; exp++) {
 
@@ -348,22 +350,24 @@ public class GestorInteracciones {
                         List<Punto> copia = copiar(dataset);
                         ResultadoBusqueda r = estrategias.get(e).resolver(copia);
                         sumaTiempo[e] += r.getTiempoEjecucionMilisegundos();
+                        sumaDist[e] += r.getComparacionesRealizadas();
                     }
                 }
 
                 System.out.print("Talla " + talla + ": ");
                 for (int e = 0; e < estrategias.size(); e++) {
                     medias[e][i] = sumaTiempo[e] / 1e6 / EXPERIMENTOS_POR_TALLA;
-                    System.out.printf(Locale.US, "%s=%.6fms  ",
-                            estrategias.get(e).getNombre(), medias[e][i]);
+                    dist[e][i] = (int) (sumaDist[e] / EXPERIMENTOS_POR_TALLA);
+                    System.out.printf(Locale.US, "%s=%.6fms(%d dd)  ",
+                            estrategias.get(e).getNombre(), medias[e][i], dist[e][i]);
                 }
                 System.out.println();
             }
 
-            // Tabla CSV para la memoria (números limpios, listos para pegar)
-            File csv = new File(carpetaActual, "tabla_" + casos[c] + ".csv");
+            // Tablas CSV para la memoria (tiempo y distancias, mismos datasets)
             try {
-                java.io.PrintWriter pw = new java.io.PrintWriter(csv);
+                java.io.PrintWriter pw = new java.io.PrintWriter(
+                        new File(carpetaActual, "tabla_" + casos[c] + ".csv"));
                 pw.println("Talla;" + String.join(";", nombresDe(estrategias)));
                 for (int i = 0; i < tallas.length; i++) {
                     StringBuilder sb = new StringBuilder(String.valueOf(tallas[i]));
@@ -373,8 +377,20 @@ public class GestorInteracciones {
                     pw.println(sb);
                 }
                 pw.close();
+
+                java.io.PrintWriter pd = new java.io.PrintWriter(
+                        new File(carpetaActual, "tabla_" + casos[c] + "_dist.csv"));
+                pd.println("Talla;" + String.join(";", nombresDe(estrategias)));
+                for (int i = 0; i < tallas.length; i++) {
+                    StringBuilder sb = new StringBuilder(String.valueOf(tallas[i]));
+                    for (int e = 0; e < estrategias.size(); e++) {
+                        sb.append(';').append(dist[e][i]);
+                    }
+                    pd.println(sb);
+                }
+                pd.close();
             } catch (java.io.IOException e) {
-                System.err.println("Error escribiendo CSV " + csv + ": " + e.getMessage());
+                System.err.println("Error escribiendo CSV de " + casos[c] + ": " + e.getMessage());
             }
 
             // Gráfica como PNG para la memoria
