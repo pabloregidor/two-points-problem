@@ -159,11 +159,12 @@ public class PanelGrafico extends JPanel {
                     && (p.equals(solucion.getPunto1()) || p.equals(solucion.getPunto2()));
 
             if (esResultado) {
-                // Punto resultado: relleno rojo + borde rojo más grueso
+                // Punto resultado: mismo tamaño, relleno rojo + borde rojo
                 g2.setColor(Color.RED);
-                g2.fillOval(x, y, TAM_PUNTO + 6, TAM_PUNTO + 6);
-                g2.setStroke(new BasicStroke(2.0f));
-                g2.drawOval(x - 2, y - 2, TAM_PUNTO + 10, TAM_PUNTO + 10);
+                g2.fillOval(x, y, TAM_PUNTO, TAM_PUNTO);
+                g2.setColor(Color.RED);
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawOval(x - 2, y - 2, TAM_PUNTO + 4, TAM_PUNTO + 4);
             } else {
                 g2.setColor(Color.BLUE);
                 g2.fillOval(x, y, TAM_PUNTO, TAM_PUNTO);
