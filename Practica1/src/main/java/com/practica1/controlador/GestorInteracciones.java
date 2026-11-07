@@ -496,28 +496,31 @@ public class GestorInteracciones {
         };
 
         for (String[] cfg : archivos) {
-            List<String[]> filas = null;
+            List<String[]> filas = new java.util.ArrayList<>();
             try {
-                filas = new java.io.BufferedReader(new java.io.FileReader(
-                        new File(carpetaActual, cfg[0])))
-                        .lines()
-                        .map(l -> l.split(";"))
-                        .toArray(String[][]::new);
+                java.io.BufferedReader br = new java.io.BufferedReader(
+                        new java.io.FileReader(new File(carpetaActual, cfg[0])));
+                String linea;
+                while ((linea = br.readLine()) != null) {
+                    filas.add(linea.split(";"));
+                }
+                br.close();
             } catch (java.io.IOException e) {
                 System.err.println("No se pudo leer " + cfg[0]);
                 continue;
             }
 
-            int n = filas.length - 1;
+            int n = filas.size() - 1;
             int[] tallas = new int[n];
             for (int i = 0; i < n; i++) {
-                tallas[i] = Integer.parseInt(filas[i + 1][0].trim());
+                tallas[i] = Integer.parseInt(filas.get(i + 1)[0].trim());
             }
 
             double[][] medias = new double[estrategias.size()][n];
             for (int e = 0; e < estrategias.size(); e++) {
                 for (int i = 0; i < n; i++) {
-                    medias[e][i] = Double.parseDouble(filas[i + 1][e + 1].replace(',', '.'));
+                    medias[e][i] = Double.parseDouble(
+                            filas.get(i + 1)[e + 1].replace(',', '.'));
                 }
             }
 
