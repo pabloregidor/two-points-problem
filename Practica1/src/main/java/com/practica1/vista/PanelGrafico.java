@@ -154,8 +154,20 @@ public class PanelGrafico extends JPanel {
         for (Punto p : puntos) {
             int x = (int) (offX + (p.getX() - minX) * escala) - TAM_PUNTO / 2;
             int y = (int) (offY + (p.getY() - minY) * escala) - TAM_PUNTO / 2;
-            g2.setColor(Color.BLUE);
-            g2.fillOval(x, y, TAM_PUNTO, TAM_PUNTO);
+
+            boolean esResultado = solucion != null
+                    && (p.equals(solucion.getPunto1()) || p.equals(solucion.getPunto2()));
+
+            if (esResultado) {
+                // Punto resultado: relleno rojo + borde rojo más grueso
+                g2.setColor(Color.RED);
+                g2.fillOval(x, y, TAM_PUNTO + 6, TAM_PUNTO + 6);
+                g2.setStroke(new BasicStroke(2.0f));
+                g2.drawOval(x - 2, y - 2, TAM_PUNTO + 10, TAM_PUNTO + 10);
+            } else {
+                g2.setColor(Color.BLUE);
+                g2.fillOval(x, y, TAM_PUNTO, TAM_PUNTO);
+            }
         }
 
         // Pie: identificación
