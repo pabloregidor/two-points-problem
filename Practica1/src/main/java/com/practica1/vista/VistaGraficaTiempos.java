@@ -108,7 +108,6 @@ public class VistaGraficaTiempos extends JPanel {
                 String etiqueta = exp == 0 ? "1 ms" : exp == -3 ? "1 micros" : "10^" + exp;
                 g2.drawString(etiqueta, 8, yPantalla + 4);
                 g2.drawLine(minX - 3, yPantalla, minX, yPantalla);
-            }
         }
 
         // marcas X: cada talla
