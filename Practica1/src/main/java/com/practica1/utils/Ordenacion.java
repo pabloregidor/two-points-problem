@@ -15,11 +15,6 @@ public final class Ordenacion {
     private Ordenacion() {
     }
 
-    /** Observador opcional: captura estados intermedios (memoria/ejemplos límite). */
-    public interface Oyente {
-        void momento(String etiqueta, List<?> instantanea);
-    }
-
     /**
      * Ordena la lista que recibe
      *
@@ -27,18 +22,6 @@ public final class Ordenacion {
      * @param comp  criterio de ordenacion: Punto.POR_X, Punto.POR_Y, ...
      */
     public static <T> void ordenar(List<T> lista, Comparator<? super T> comp) {
-        ordenar(lista, comp, null);
-    }
-
-    /**
-     * Ordena con HeapSort avisando al oyente (si no es null) en cada fase.
-     *
-     * @param lista lista (se modifica)
-     * @param comp  criterio de ordenacion
-     * @param oyente observador opcional (null = sin avisos)
-     */
-    public static <T> void ordenar(List<T> lista, Comparator<? super T> comp,
-                                   Oyente oyente) {
 
         int n = lista.size();
 
@@ -46,18 +29,9 @@ public final class Ordenacion {
             return;
         }
 
-        if (oyente != null) {
-            oyente.momento("Estado inicial", new java.util.ArrayList<>(lista));
-        }
-
         // ===== FASE 1: CONSTRUIR el max-heap =====
         for (int i = n / 2 - 1; i >= 0; i--) {
             cribar(lista, i, n, comp);
-        }
-
-        if (oyente != null) {
-            oyente.momento("Tras construir el max-heap (Fase 1)",
-                           new java.util.ArrayList<>(lista));
         }
 
         // ===== FASE 2: EXTRAER el maximo n-1 veces =====
@@ -65,14 +39,9 @@ public final class Ordenacion {
             intercambiar(lista, 0, fin);
             cribar(lista, 0, fin, comp);
         }
-
-        if (oyente != null) {
-            oyente.momento("Ordenado (tras la Fase 2)",
-                           new java.util.ArrayList<>(lista));
-        }
     }
 
-    /**
+/**
      * Hundir el elemento en la posicion i hasta que se respete el invariante 
      */
     private static <T> void cribar(List<T> lista, int i, int fin,

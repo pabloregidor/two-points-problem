@@ -44,25 +44,6 @@ public class PanelGrafico extends JPanel {
      * Renderiza el panel de solución a un PNG SIN abrir ventana
      * (capturas de la memoria, al estilo de VistaGraficaTiempos).
      */
-    public static void guardarComoImagen(List<Punto> puntos, ResultadoBusqueda solucion,
-                                         String titulo, File destino) {
-        try {
-            PanelGrafico panel = new PanelGrafico();
-            panel.setPreferredSize(new Dimension(900, 700));
-            panel.setSize(900, 700);
-            panel.setDatos(puntos, solucion, titulo);
-
-            java.awt.image.BufferedImage img =
-                    new java.awt.image.BufferedImage(900, 700,
-                            java.awt.image.BufferedImage.TYPE_INT_RGB);
-            java.awt.Graphics2D g = img.createGraphics();
-            panel.printAll(g);
-            g.dispose();
-            javax.imageio.ImageIO.write(img, "png", destino);
-        } catch (Exception e) {
-            System.err.println("Error generando imagen " + destino + ": " + e.getMessage());
-        }
-    }
 
     /**
      * Abre la ventana con la gráfica.

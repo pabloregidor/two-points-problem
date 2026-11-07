@@ -15,7 +15,6 @@ import com.practica1.modelo.algoritmos.DyVMejorada;
 import com.practica1.modelo.algoritmos.EstrategiaAlgoritmica;
 import com.practica1.utils.GestorFicheros;
 import com.practica1.utils.Ordenacion;
-import com.practica1.vista.ImagenEstadosArray;
 import com.practica1.vista.PanelGrafico;
 import com.practica1.vista.VistaGraficaTiempos;
 
@@ -319,98 +318,6 @@ public class GestorInteracciones {
      * peor caso, imprime las tablas y guarda las 2 gráficas como PNG
      * SIN interacción. Lanzado con `App capturas`.
      */
-    public void capturasParaMemoria() {
-
-
-        int[] tallas = {200, 500, 1000, 1500, 2000, 3000, 4000, 5000};
-        String[] casos = {"caso_medio", "peor_caso"};
-        boolean[] medios = {true, false};
-
-        for (int c = 0; c < casos.length; c++) {
-
-            System.out.println("\n===== EXPERIMENTO " + casos[c].toUpperCase()
-                    + " =====");
-            System.out.println();
-
-            double[][] medias = new double[estrategias.size()][tallas.length];
-            int[][] dist = new int[estrategias.size()][tallas.length];
-
-            for (int i = 0; i < tallas.length; i++) {
-                int talla = tallas[i];
-                long[] sumaTiempo = new long[estrategias.size()];
-                long[] sumaDist = new long[estrategias.size()];
-
-                for (int exp = 0; exp < EXPERIMENTOS_POR_TALLA; exp++) {
-
-                    gestorFicheros.generarAleatorio(talla, medios[c], carpetaActual);
-                    List<Punto> dataset = gestorFicheros.cargarTSP(
-                            new File(carpetaActual, "dataset" + talla + ".tsp"));
-
-                    for (int e = 0; e < estrategias.size(); e++) {
-                        List<Punto> copia = copiar(dataset);
-                        ResultadoBusqueda r = estrategias.get(e).resolver(copia);
-                        sumaTiempo[e] += r.getTiempoEjecucionMilisegundos();
-                        sumaDist[e] += r.getComparacionesRealizadas();
-                    }
-                }
-
-                System.out.print("Talla " + talla + ": ");
-                for (int e = 0; e < estrategias.size(); e++) {
-                    medias[e][i] = sumaTiempo[e] / 1e6 / EXPERIMENTOS_POR_TALLA;
-                    dist[e][i] = (int) (sumaDist[e] / EXPERIMENTOS_POR_TALLA);
-                    System.out.printf(Locale.US, "%s=%.6fms(%d dd)  ",
-                            estrategias.get(e).getNombre(), medias[e][i], dist[e][i]);
-                }
-                System.out.println();
-            }
-
-            // Tablas CSV para la memoria (tiempo y distancias, mismos datasets)
-            try {
-                java.io.PrintWriter pw = new java.io.PrintWriter(
-                        new File(carpetaActual, "tabla_" + casos[c] + ".csv"));
-                pw.println("Talla;" + String.join(";", nombresDe(estrategias)));
-                for (int i = 0; i < tallas.length; i++) {
-                    StringBuilder sb = new StringBuilder(String.valueOf(tallas[i]));
-                    for (int e = 0; e < estrategias.size(); e++) {
-                        sb.append(';').append(String.format(Locale.US, "%.6f", medias[e][i]));
-                    }
-                    pw.println(sb);
-                }
-                pw.close();
-
-                java.io.PrintWriter pd = new java.io.PrintWriter(
-                        new File(carpetaActual, "tabla_" + casos[c] + "_dist.csv"));
-                pd.println("Talla;" + String.join(";", nombresDe(estrategias)));
-                for (int i = 0; i < tallas.length; i++) {
-                    StringBuilder sb = new StringBuilder(String.valueOf(tallas[i]));
-                    for (int e = 0; e < estrategias.size(); e++) {
-                        sb.append(';').append(dist[e][i]);
-                    }
-                    pd.println(sb);
-                }
-                pd.close();
-            } catch (java.io.IOException e) {
-                System.err.println("Error escribiendo CSV de " + casos[c] + ": " + e.getMessage());
-            }
-
-            // Gráfica como PNG para la memoria
-            java.awt.Color[] colores = {
-                    java.awt.Color.BLACK, java.awt.Color.RED,
-                    java.awt.Color.BLUE, java.awt.Color.GREEN.darker()
-            };
-            new VistaGraficaTiempos().guardarComoImagen(
-                    new VistaGraficaTiempos.Datos(tallas, medias,
-                            nombresDe(estrategias), colores),
-                    casos[c],
-                    new File(carpetaActual, "grafica_" + casos[c] + ".png"),
-                    !casos[c].equals("peor_caso"));
-        }
-
-        System.out.println("\nCAPTURAS PARA LA MEMORIA LISTAS (PNG + CSV en "
-                + carpetaActual.getAbsolutePath() + ")");
-        // modo sin ventanas: la JVM puede quedarse viva por los hilos AWT
-        System.exit(0);
-    }
 
     /**
      * MODO CAPTURAS AUX: genera las imágenes complementarias de la memoria
@@ -419,125 +326,12 @@ public class GestorInteracciones {
      *  - ejemplos límite del HeapSort (estados inicial / heap / ordenado)
      * Lanzado con `App capturas_aux`.
      */
-    public void capturasAuxiliaresParaMemoria() {
-
-        com.practica1.modelo.algoritmos.EstrategiaAlgoritmica poda =
-                new com.practica1.modelo.algoritmos.BusquedaConPoda();
-
-        // ===== 1. Dibujo de la solución — CASO MEDIO =====
-        List<Punto> datasetMedio = gestorFicheros.generarAleatorio(600, true, carpetaActual);
-        ResultadoBusqueda rMedio = poda.resolver(copiar(datasetMedio));
-        PanelGrafico.guardarComoImagen(datasetMedio, rMedio, "caso medio",
-                new File(carpetaActual, "dibujo_solucion_caso_medio.png"));
-        System.out.println("OK dibujo_solucion_caso_medio.png");
-
-        // ===== 2. Dibujo de la solución — PEOR CASO (misma x: la vertical) =====
-        List<Punto> datasetPeor = gestorFicheros.generarAleatorio(600, false, carpetaActual);
-        ResultadoBusqueda rPeor = poda.resolver(copiar(datasetPeor));
-        PanelGrafico.guardarComoImagen(datasetPeor, rPeor, "peor caso (misma x)",
-                new File(carpetaActual, "dibujo_solucion_peor_caso.png"));
-        System.out.println("OK dibujo_solucion_peor_caso.png");
-
-        // ===== 3. Ejemplos límite del HeapSort =====
-        java.util.Random r = new java.util.Random();
-        int n = 12;
-
-        // CASO 'MEJOR' (datos aleatorios)
-        List<Integer> mejor = ImagenEstadosArray.aleatorios(n, r);
-        List<String> etiquetas = new java.util.ArrayList<>();
-        List<List<Integer>> estados = new java.util.ArrayList<>();
-        Ordenacion.ordenar(mejor, java.util.Comparator.naturalOrder(),
-                (etiqueta, instantanea) -> {
-                    etiquetas.add(etiqueta);
-                    estados.add(new java.util.ArrayList<>());
-                    for (Object o : instantanea) {
-                        estados.get(estados.size() - 1)
-                               .add(((Number) o).intValue());
-                    }
-                });
-        ImagenEstadosArray.guardar(etiquetas, estados,
-                new File(carpetaActual, "heapsort_datos_aleatorios.png"));
-        System.out.println("OK heapsort_datos_aleatorios.png");
-
-        // CASO LÍMITE (ordenado ascendente: caso clásico de estudio del HeapSort)
-        List<Integer> ascendente = new java.util.ArrayList<>();
-        for (int i = 1; i <= n; i++) {
-            ascendente.add(i);
-        }
-        List<String> etiquetas2 = new java.util.ArrayList<>();
-        List<List<Integer>> estados2 = new java.util.ArrayList<>();
-        Ordenacion.ordenar(ascendente, java.util.Comparator.naturalOrder(),
-                (etiqueta, instantanea) -> {
-                    etiquetas2.add(etiqueta);
-                    estados2.add(new java.util.ArrayList<>());
-                    for (Object o : instantanea) {
-                        estados2.get(estados2.size() - 1)
-                               .add(((Number) o).intValue());
-                    }
-                });
-        ImagenEstadosArray.guardar(etiquetas2, estados2,
-                new File(carpetaActual, "heapsort_ordenado_ascendente.png"));
-        System.out.println("OK heapsort_ordenado_ascendente.png");
-
-        System.out.println("CAPTURAS AUXILIARES LISTAS en " + carpetaActual.getAbsolutePath());
-        System.exit(0);
-    }
 
     /**
      * MODO GRAFICAS: vuelve a dibujar las 2 gráficas de tiempos leyendo
      * LOS CSV GUARDADOS (sin repetir experimentos: mismos datos).
      * Caso medio en escala logarítmica; peor caso en lineal.
      */
-    public void graficasDesdeCsv() {
-
-        String[][] archivos = {
-                {"tabla_caso_medio.csv", "grafica_caso_medio.png", "caso medio", "true"},
-                {"tabla_peor_caso.csv", "grafica_peor_caso.png", "peor caso", "false"}
-        };
-
-        for (String[] cfg : archivos) {
-            List<String[]> filas = new java.util.ArrayList<>();
-            try {
-                java.io.BufferedReader br = new java.io.BufferedReader(
-                        new java.io.FileReader(new File(carpetaActual, cfg[0])));
-                String linea;
-                while ((linea = br.readLine()) != null) {
-                    filas.add(linea.split(";"));
-                }
-                br.close();
-            } catch (java.io.IOException e) {
-                System.err.println("No se pudo leer " + cfg[0]);
-                continue;
-            }
-
-            int n = filas.size() - 1;
-            int[] tallas = new int[n];
-            for (int i = 0; i < n; i++) {
-                tallas[i] = Integer.parseInt(filas.get(i + 1)[0].trim());
-            }
-
-            double[][] medias = new double[estrategias.size()][n];
-            for (int e = 0; e < estrategias.size(); e++) {
-                for (int i = 0; i < n; i++) {
-                    medias[e][i] = Double.parseDouble(
-                            filas.get(i + 1)[e + 1].replace(',', '.'));
-                }
-            }
-
-            java.awt.Color[] colores = {
-                    java.awt.Color.BLACK, java.awt.Color.RED,
-                    java.awt.Color.BLUE, java.awt.Color.GREEN.darker()
-            };
-            new VistaGraficaTiempos().guardarComoImagen(
-                    new VistaGraficaTiempos.Datos(tallas, medias,
-                            nombresDe(estrategias), colores),
-                    cfg[2],
-                    new File(carpetaActual, cfg[1]),
-                    Boolean.parseBoolean(cfg[3]));
-            System.out.println("OK grafica_" + cfg[2].replace(" ", "_") + ".png");
-        }
-        System.exit(0);
-    }
 
     public void demoConVentana() {
 
