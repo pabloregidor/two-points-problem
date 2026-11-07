@@ -14,6 +14,8 @@ public class App {
             new GestorInteracciones().capturasParaMemoria();
         } else if (args.length > 0 && "capturas_aux".equals(args[0])) {
             new GestorInteracciones().capturasAuxiliaresParaMemoria();
+        } else if (args.length > 0 && "graficas".equals(args[0])) {
+            new GestorInteracciones().graficasDesdeCsv();
         } else {
             new GestorInteracciones().menuPrincipal();
         }

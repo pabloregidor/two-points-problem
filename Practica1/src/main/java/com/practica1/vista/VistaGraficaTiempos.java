@@ -25,6 +25,7 @@ public class VistaGraficaTiempos extends JPanel {
 
     private Datos datos;
     private String titulo = "";
+    private boolean escalaLog = true;
 
     public VistaGraficaTiempos() {
         setPreferredSize(new Dimension(850, 550));
@@ -43,10 +44,17 @@ public class VistaGraficaTiempos extends JPanel {
      * (usado para las capturas de la memoria: nítido y reproducible).
      */
     public static void guardarComoImagen(Datos d, String titulo, File destino) {
+        guardarComoImagen(d, titulo, destino, true);
+    }
+
+    /** Variante con escala elegible: true = logarítmica, false = lineal. */
+    public static void guardarComoImagen(Datos d, String titulo, File destino,
+                                         boolean escalaLog) {
         try {
             VistaGraficaTiempos panel = new VistaGraficaTiempos();
             panel.setPreferredSize(new Dimension(1150, 640));
             panel.setSize(1150, 640);
+            panel.escalaLog = escalaLog;
             panel.setDatos(d, titulo);
 
             java.awt.image.BufferedImage img =
@@ -96,11 +104,13 @@ public class VistaGraficaTiempos extends JPanel {
         int minX = MARGEN_IZQ, maxY = h - MARGEN_AB;
         int maxX = w - MARGEN_DER, minY = MARGEN_ARR;
 
-        // Calcular rango del eje Y en log10
+        // Calcular rango del eje Y (log o lineal según escalaLog)
         double maxLogY = Double.NEGATIVE_INFINITY;
         double minLogY = Double.POSITIVE_INFINITY;
+        double maxLinY = Double.NEGATIVE_INFINITY;
         for (double[] porEstrategia : tiempos) {
             for (double v : porEstrategia) {
+                maxLinY = Math.max(maxLinY, v);
                 double logv = Math.log10(Math.max(v, 0.001));
                 maxLogY = Math.max(maxLogY, logv);
                 minLogY = Math.min(minLogY, logv);
@@ -110,6 +120,7 @@ public class VistaGraficaTiempos extends JPanel {
             maxLogY = Math.ceil(maxLogY) + 0.5;   // evitar rango degenerado
             minLogY = maxLogY - 1;
         }
+        maxLinY = maxLinY * 1.08 + 0.001;
 
         double minTalla = tallas[0], maxTalla = tallas[tallas.length - 1];
 
@@ -118,19 +129,32 @@ public class VistaGraficaTiempos extends JPanel {
         g2.drawLine(minX, maxY, maxX + 10, maxY);              // eje X
         g2.drawLine(minX, minY - 5, minX, maxY);               // eje Y
 
-        // marcas Y: cada potencia de 10
+        // marcas Y
         g2.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        for (int exp = (int) Math.floor(minLogY); exp <= (int) Math.ceil(maxLogY); exp++) {
-            double fraccion = (maxLogY - exp) / (maxLogY - minLogY);
-            int yPantalla = (int) (minY + fraccion * (maxY - minY));
-            if (yPantalla < minY - 5 || yPantalla > maxY + 5) continue;
+        if (escalaLog) {
+            for (int exp = (int) Math.floor(minLogY); exp <= (int) Math.ceil(maxLogY); exp++) {
+                double fraccion = (maxLogY - exp) / (maxLogY - minLogY);
+                int yPantalla = (int) (minY + fraccion * (maxY - minY));
+                if (yPantalla < minY - 5 || yPantalla > maxY + 5) continue;
 
-            g2.setColor(new Color(225, 225, 225));
-            g2.drawLine(minX, yPantalla, maxX, yPantalla);
-            g2.setColor(Color.GRAY);
-            String etiqueta = exp == 0 ? "1 ms" : exp == -3 ? "1 micros" : "10^" + exp;
-            g2.drawString(etiqueta, 8, yPantalla + 4);
-            g2.drawLine(minX - 3, yPantalla, minX, yPantalla);
+                g2.setColor(new Color(225, 225, 225));
+                g2.drawLine(minX, yPantalla, maxX, yPantalla);
+                g2.setColor(Color.GRAY);
+                String etiqueta = exp == 0 ? "1 ms" : exp == -3 ? "1 micros" : "10^" + exp;
+                g2.drawString(etiqueta, 8, yPantalla + 4);
+                g2.drawLine(minX - 3, yPantalla, minX, yPantalla);
+            }
+        } else {
+            for (int k = 0; k <= 4; k++) {
+                double valor = maxLinY * k / 4.0;
+                int yPantalla = (int) (maxY - (valor / maxLinY) * (maxY - minY));
+                g2.setColor(new Color(225, 225, 225));
+                g2.drawLine(minX, yPantalla, maxX, yPantalla);
+                g2.setColor(Color.GRAY);
+                String etiqueta = String.format(java.util.Locale.US, "%.1f ms", valor);
+                g2.drawString(etiqueta, 8, yPantalla + 4);
+                g2.drawLine(minX - 3, yPantalla, minX, yPantalla);
+            }
         }
 
         // marcas X: cada talla
@@ -153,10 +177,16 @@ public class VistaGraficaTiempos extends JPanel {
 
             Point anterior = null;
             for (int i = 0; i < tallas.length; i++) {
+                double vy = tiempos[e][i];
+                int yP;
+                if (escalaLog) {
+                    yP = yDe(Math.log10(Math.max(vy, 0.001)),
+                             minLogY, maxLogY, minY, maxY);
+                } else {
+                    yP = (int) (maxY - (vy / maxLinY) * (maxY - minY));
+                }
                 Point actual = new Point(
-                        xDe(tallas[i], minTalla, maxTalla, minX, maxX),
-                        yDe(Math.log10(Math.max(tiempos[e][i], 0.001)),
-                            minLogY, maxLogY, minY, maxY));
+                        xDe(tallas[i], minTalla, maxTalla, minX, maxX), yP);
                 if (anterior != null) {
                     g2.drawLine(anterior.x, anterior.y, actual.x, actual.y);
                 }

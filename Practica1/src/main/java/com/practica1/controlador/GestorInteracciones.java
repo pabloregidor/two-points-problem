@@ -402,7 +402,8 @@ public class GestorInteracciones {
                     new VistaGraficaTiempos.Datos(tallas, medias,
                             nombresDe(estrategias), colores),
                     casos[c],
-                    new File(carpetaActual, "grafica_" + casos[c] + ".png"));
+                    new File(carpetaActual, "grafica_" + casos[c] + ".png"),
+                    !casos[c].equals("peor_caso"));
         }
 
         System.out.println("\nCAPTURAS PARA LA MEMORIA LISTAS (PNG + CSV en "
@@ -479,6 +480,59 @@ public class GestorInteracciones {
         System.out.println("OK heapsort_ordenado_ascendente.png");
 
         System.out.println("CAPTURAS AUXILIARES LISTAS en " + carpetaActual.getAbsolutePath());
+        System.exit(0);
+    }
+
+    /**
+     * MODO GRAFICAS: vuelve a dibujar las 2 gráficas de tiempos leyendo
+     * LOS CSV GUARDADOS (sin repetir experimentos: mismos datos).
+     * Caso medio en escala logarítmica; peor caso en lineal.
+     */
+    public void graficasDesdeCsv() {
+
+        String[][] archivos = {
+                {"tabla_caso_medio.csv", "grafica_caso_medio.png", "caso medio", "true"},
+                {"tabla_peor_caso.csv", "grafica_peor_caso.png", "peor caso", "false"}
+        };
+
+        for (String[] cfg : archivos) {
+            List<String[]> filas = null;
+            try {
+                filas = new java.io.BufferedReader(new java.io.FileReader(
+                        new File(carpetaActual, cfg[0])))
+                        .lines()
+                        .map(l -> l.split(";"))
+                        .toArray(String[][]::new);
+            } catch (java.io.IOException e) {
+                System.err.println("No se pudo leer " + cfg[0]);
+                continue;
+            }
+
+            int n = filas.length - 1;
+            int[] tallas = new int[n];
+            for (int i = 0; i < n; i++) {
+                tallas[i] = Integer.parseInt(filas[i + 1][0].trim());
+            }
+
+            double[][] medias = new double[estrategias.size()][n];
+            for (int e = 0; e < estrategias.size(); e++) {
+                for (int i = 0; i < n; i++) {
+                    medias[e][i] = Double.parseDouble(filas[i + 1][e + 1].replace(',', '.'));
+                }
+            }
+
+            java.awt.Color[] colores = {
+                    java.awt.Color.BLACK, java.awt.Color.RED,
+                    java.awt.Color.BLUE, java.awt.Color.GREEN.darker()
+            };
+            new VistaGraficaTiempos().guardarComoImagen(
+                    new VistaGraficaTiempos.Datos(tallas, medias,
+                            nombresDe(estrategias), colores),
+                    cfg[2],
+                    new File(carpetaActual, cfg[1]),
+                    Boolean.parseBoolean(cfg[3]));
+            System.out.println("OK grafica_" + cfg[2].replace(" ", "_") + ".png");
+        }
         System.exit(0);
     }
 
