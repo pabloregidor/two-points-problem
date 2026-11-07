@@ -33,8 +33,8 @@ public class BusquedaConPoda extends EstrategiaAlgoritmica {
 
             Punto pi = puntos.get(i);
 
-            // Aborto: si x_j - x_i >= mejorDistancia, ningún punto posterior
-            // puede mejorar; se descartan todos los p_k con k > j.
+            // si la separación de «x» ya es mayor que la mejor distancia,
+            // ninguno de los puntos que quedan puede mejorar y se descartan
             int j = i + 1;
             while (j < puntos.size()
                    && puntos.get(j).getX() - pi.getX() < mejorDistancia) {

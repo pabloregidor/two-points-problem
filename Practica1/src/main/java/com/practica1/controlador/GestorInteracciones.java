@@ -25,7 +25,7 @@ public class GestorInteracciones {
     private final GestorFicheros gestorFicheros = new GestorFicheros();
     private final Scanner teclado = new Scanner(System.in);
 
-    // Las 4 estrategias en el orden de la tabla del enunciado
+    // las cuatro estrategias en este orden
     private final List<EstrategiaAlgoritmica> estrategias = List.of(
             new BusquedaExhaustiva(),
             new BusquedaConPoda(),
@@ -79,13 +79,13 @@ public class GestorInteracciones {
         }
     }
 
-    // ===== ACCIÓN NÚCLEO 1 (pública: CLI y GUI) =====
+    // crear el fichero con puntos aleatorios
     public void crearFicheroAleatorio(int n, boolean casoMedio) {
         gestorFicheros.generarAleatorio(n, casoMedio, carpetaActual);
         System.out.println("Fichero creado: dataset" + n + ".tsp");
     }
 
-    // (envoltorio CLI que pide datos por consola)
+    // (esta versión lo pide por teclado)
     private void crearFicheroAleatorio() {
 
         System.out.print("¿Cuántos puntos? ");
@@ -101,7 +101,7 @@ public class GestorInteracciones {
         crearFicheroAleatorio(n, modo == 1);
     }
 
-    // ===== ACCIÓN NÚCLEO 2 (pública: CLI y GUI) =====
+    // cargar el dataset
     public List<Punto> cargarFichero(File f) {
 
         List<Punto> puntos = gestorFicheros.cargarTSP(f);
@@ -115,7 +115,7 @@ public class GestorInteracciones {
         return null;
     }
 
-    // (envoltorio CLI)
+    // (esta versión lo pide por teclado)
     private void cargarDataset() {
 
         System.out.print("Ruta del fichero .tsp: ");
@@ -123,7 +123,7 @@ public class GestorInteracciones {
         cargarFichero(new File(ruta));
     }
 
-    // ===== ACCIÓN NÚCLEO 3 (pública): la opción 3 del enunciado =====
+    // comprobar las cuatro estrategias
     public void comprobarEstrategias() {
 
         if (!hayDataset()) return;
@@ -160,12 +160,10 @@ public class GestorInteracciones {
                              datasetCargado.size() + " puntos", true);
     }
 
-    // ===== OPCIÓN 4: todas las estrategias =====
-    // ===== OPCIÓN 5: solo 2, con distancias mostradas =====
-    // ===== ACCIÓN NÚCLEO 4/5 (pública) =====
+    // comparar estrategias (por teclado se piden las tallas)
     private void compararEstrategiasDesdeMenu(List<EstrategiaAlgoritmica> estrs) {
 
-        // Esquema del enunciado (pág. 11): tamaños entre min y max con paso
+        // tamaños entre el mínimo y el máximo, subiendo del paso en paso
         System.out.print("Talla mínima: ");
         int tallaMin = teclado.nextInt();
         System.out.print("Talla máxima: ");
@@ -181,7 +179,7 @@ public class GestorInteracciones {
         compararEstrategias(estrs, tallaMin, tallaMax, paso, modo == 1);
     }
 
-    // ===== OPCIÓN 5: solo 2, con distancias mostradas =====
+    // comparar solo dos estrategias, pidiéndolas por teclado
     private void compararDos() {
 
         System.out.println("Estrategias disponibles:");
@@ -203,7 +201,7 @@ public class GestorInteracciones {
         compararEstrategiasDesdeMenu(par);
     }
 
-    // ===== NÚCLEO de comparación (pública: CLI y GUI) =====
+    // comparar con varias tallas y hacer la media de cada una
     public void compararEstrategias(List<EstrategiaAlgoritmica> estrs,
                                     int tallaMin, int tallaMax, int paso,
                                     boolean casoMedio) {
@@ -245,7 +243,7 @@ public class GestorInteracciones {
 
                 for (int e = 0; e < estrs.size(); e++) {
 
-                    // Copia por estrategia y por experimento
+                    // copia nueva para cada estrategia
                     List<Punto> copia = copiar(dataset);
                     ResultadoBusqueda r = estrs.get(e).resolver(copia);
 
@@ -355,7 +353,7 @@ public class GestorInteracciones {
             System.arraycopy(medias[e], 0, datos[e], 0, n);
         }
 
-        // Wait until the window close (so the JVM lives and the user sees it)
+        // para que el programa no acabe hasta cerrar la ventana
         java.util.concurrent.CountDownLatch cierre = new java.util.concurrent.CountDownLatch(1);
 
         javax.swing.SwingUtilities.invokeLater(() -> {

@@ -37,18 +37,18 @@ public class DyV extends EstrategiaAlgoritmica {
 
     private ResultadoBusqueda dyvRec(List<Punto> p, int izq, int der) {
 
-        // Caso base 1: 0 o 1 punto -> par imposible 
+        // caso base: 0 o 1 punto, par imposible
         if (der - izq < 1) {
             return VACIO;
         }
 
-        // Caso base 2: 2 puntos -> par directo
+        // caso base: 2 puntos, par directo
         if (der - izq == 1) {
             double d = calcularDistancia(p.get(izq), p.get(der));
             return new ResultadoBusqueda(p.get(izq), p.get(der), d, 1, 0);
         }
 
-        // DIVIDE 
+        // DIVIDE
         int medio = izq + (der - izq) / 2;
         double xm = p.get(medio).getX();
 
@@ -56,9 +56,8 @@ public class DyV extends EstrategiaAlgoritmica {
         ResultadoBusqueda rd = dyvRec(p, medio + 1, der);
         ResultadoBusqueda min = combinar(ri, rd);
 
-        // VENCERAS: franja central |x - xm| < d_min.
-        // Construcción EFICIENTE con doble puntero sobre la lista
-        // ordenada por x: O(tam franja) en vez de O(n) por nodo.
+        // VENCERAS: franja central con los puntos a menos de la menor distancia de la línea.
+        // Se construye con dos punteros desde el medio, sin recorrer toda la lista.
         double dMin = min.getDistanciaMinima();
 
         int li = medio;           // descender por la izquierda
@@ -81,7 +80,7 @@ public class DyV extends EstrategiaAlgoritmica {
             franja.add(p.get(i));
         }
 
-        // Busqueda con poda dentro de la franja
+        // búsqueda con poda dentro de la franja
         int contador = min.getComparacionesRealizadas();
         Punto mejorP1 = min.getPunto1();
         Punto mejorP2 = min.getPunto2();
@@ -89,7 +88,7 @@ public class DyV extends EstrategiaAlgoritmica {
         for (int a = 0; a < franja.size() - 1; a++) {
             for (int b = a + 1; b < franja.size(); b++) {
                 if (Math.abs(franja.get(a).getX() - franja.get(b).getX()) >= dMin) {
-                    break;   // poda: comparacion de x, NO se contabiliza
+                    break;   // descarte por la «x»: no es una distancia euclídea
                 }
                 double d = calcularDistancia(franja.get(a), franja.get(b));
                 contador++;
@@ -104,7 +103,7 @@ public class DyV extends EstrategiaAlgoritmica {
         return new ResultadoBusqueda(mejorP1, mejorP2, dMin, contador, 0);
     }
 
-    // Combina dos resultados: gana la menor distancia, se SUMAN los contadores
+    // se queda el de menor distancia y se suman los contadores
     private ResultadoBusqueda combinar(ResultadoBusqueda a, ResultadoBusqueda b) {
         if (a.getDistanciaMinima() <= b.getDistanciaMinima()) {
             return new ResultadoBusqueda(a.getPunto1(), a.getPunto2(),

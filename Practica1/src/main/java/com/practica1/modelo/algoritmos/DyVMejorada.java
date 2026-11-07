@@ -26,9 +26,9 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
 
     @Override
     public ResultadoBusqueda resolver(List<Punto> puntos) {
-        // Copia defensiva: el dataset original NO debe quedar ordenado
+        // copia con ordenación: el dataset original no debe quedar ordenado
         List<Punto> copia = new ArrayList<>(puntos);
-        // Ordenacion propia del alumno (HeapSort) — requisito del enunciado
+        // ordenación propia (HeapSort) por la «x»
         Ordenacion.ordenar(copia, Punto.POR_X);
 
         long inicio = System.nanoTime();
@@ -53,7 +53,7 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
             return new ResultadoBusqueda(p.get(izq), p.get(der), d, 1, 0);
         }
 
-        // DIVIDE (medio es INDICE; la vertical es la x de ese punto)
+        // DIVIDE (medio es un índice; la vertical es la «x» de ese punto)
         int medio = izq + (der - izq) / 2;
         double xm = p.get(medio).getX();
 
@@ -61,9 +61,8 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
         ResultadoBusqueda rd = dyvRec(p, medio + 1, der);
         ResultadoBusqueda min = combinar(ri, rd);
 
-        // VENCERAS: franja central |x - xm| < d_min.
-        // Construcción EFICIENTE con doble puntero sobre la lista
-        // ordenada por x: O(tam franja) en vez de O(n) por nodo.
+        // VENCERAS: franja central con los puntos a menos de la menor distancia de la línea.
+        // Se construye con dos punteros desde el medio, sin recorrer toda la lista.
         double dMin = min.getDistanciaMinima();
 
         int li = medio;
@@ -86,8 +85,8 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
             franja.add(p.get(i));
         }
 
-        // === MEJORA respecto a DyV ===
-        // La franja se ordena por Y (en cada llamada recursiva)
+        // === la mejora ===
+        // la franja se ordena por la «y» en cada llamada
         Ordenacion.ordenar(franja, Punto.POR_Y);
 
         // Cada punto solo se compara con sus VENTANA vecinos siguientes

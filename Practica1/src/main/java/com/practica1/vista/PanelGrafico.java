@@ -106,7 +106,7 @@ public class PanelGrafico extends JPanel {
         double offX = (w - anchoMundo * escala) / 2.0;
         double offY = (h - altoMundo * escala) / 2.0;
 
-        // La línea de la solción DEBAJO de los puntos
+        // la línea se dibuja antes que los puntos
         if (solucion != null && solucion.getPunto1() != null) {
             Punto p1 = solucion.getPunto1();
             Punto p2 = solucion.getPunto2();
