@@ -40,10 +40,6 @@ public class PanelGrafico extends JPanel {
         repaint();
     }
 
-    /**
-     * Renderiza el panel de solución a un PNG SIN abrir ventana
-     * (capturas de la memoria, al estilo de VistaGraficaTiempos).
-     */
 
     /**
      * Abre la ventana con la gráfica.

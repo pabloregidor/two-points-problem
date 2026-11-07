@@ -311,22 +311,6 @@ public class GestorInteracciones {
         }
         return nombres;
     }
-
-    /**
-     * MODO CAPTURAS: ejecuta los experimentos OFICIALES de la memoria
-     * (tallas 200..5000, 10 experimentos por talla) en caso medio y
-     * peor caso, imprime las tablas y guarda las 2 gráficas como PNG
-     * SIN interacción. Lanzado con `App capturas`.
-     */
-
-    /**
-     * MODO CAPTURAS AUX: genera las imágenes complementarias de la memoria
-     * SIN repetir los experimentos largos:
-     *  - dibujo de la solución (PanelGrafico) en caso medio y peor caso
-     *  - ejemplos límite del HeapSort (estados inicial / heap / ordenado)
-     * Lanzado con `App capturas_aux`.
-     */
-
     /**
      * MODO GRAFICAS: vuelve a dibujar las 2 gráficas de tiempos leyendo
      * LOS CSV GUARDADOS (sin repetir experimentos: mismos datos).
