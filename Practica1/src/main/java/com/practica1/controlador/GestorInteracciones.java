@@ -391,6 +391,8 @@ public class GestorInteracciones {
 
         System.out.println("\nCAPTURAS PARA LA MEMORIA LISTAS (PNG + CSV en "
                 + carpetaActual.getAbsolutePath() + ")");
+        // modo sin ventanas: la JVM puede quedarse viva por los hilos AWT
+        System.exit(0);
     }
 
     /**
@@ -461,6 +463,7 @@ public class GestorInteracciones {
         System.out.println("OK heapsort_ordenado_ascendente.png");
 
         System.out.println("CAPTURAS AUXILIARES LISTAS en " + carpetaActual.getAbsolutePath());
+        System.exit(0);
     }
 
     public void demoConVentana() {
