@@ -20,7 +20,7 @@ import com.practica1.modelo.ResultadoBusqueda;
 public class PanelGrafico extends JPanel {
 
     private static final int MARGEN = 40;
-    private static final int TAM_PUNTO = 3;   // evita solapes: el par solución es siempre el más cercano
+    private static final int TAM_PUNTO = 5;
 
     private List<Punto> puntos;
     private ResultadoBusqueda solucion;
