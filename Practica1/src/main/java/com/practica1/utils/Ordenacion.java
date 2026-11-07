@@ -41,8 +41,8 @@ public final class Ordenacion {
         }
     }
 
-/**
-     * Hundir el elemento en la posicion i hasta que se respete el invariante 
+    /**
+     * Hundir el elemento en la posicion i hasta que se respete el invariante
      */
     private static <T> void cribar(List<T> lista, int i, int fin,
                                    Comparator<? super T> comp) {

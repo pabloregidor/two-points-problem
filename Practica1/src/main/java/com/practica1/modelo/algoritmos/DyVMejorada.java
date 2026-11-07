@@ -18,6 +18,7 @@ public class DyVMejorada extends EstrategiaAlgoritmica {
         return "DyV Mejorado";
     }
 
+    // se comprueba cada punto con los 7 siguientes de la franja ordenada por «y»
     private static final int VENTANA = 7;
 
     private static final ResultadoBusqueda VACIO =

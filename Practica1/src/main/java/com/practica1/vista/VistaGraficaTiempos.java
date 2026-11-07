@@ -97,8 +97,7 @@ public class VistaGraficaTiempos extends JPanel {
 
         // marcas Y: cada potencia de 10
         g2.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        {
-            for (int exp = (int) Math.floor(minLogY); exp <= (int) Math.ceil(maxLogY); exp++) {
+        for (int exp = (int) Math.floor(minLogY); exp <= (int) Math.ceil(maxLogY); exp++) {
                 double fraccion = (maxLogY - exp) / (maxLogY - minLogY);
                 int yPantalla = (int) (minY + fraccion * (maxY - minY));
                 if (yPantalla < minY - 5 || yPantalla > maxY + 5) continue;

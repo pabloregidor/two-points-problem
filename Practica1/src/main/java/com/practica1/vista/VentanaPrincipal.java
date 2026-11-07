@@ -178,6 +178,7 @@ public class VentanaPrincipal extends JFrame {
 
         @Override
         public void write(int b) {
+            // lo que el programa imprime por consola acaba aquí, en la caja de texto
             SwingUtilities.invokeLater(() -> {
                 area.append(String.valueOf((char) b));
                 contenedor.getVerticalScrollBar()
